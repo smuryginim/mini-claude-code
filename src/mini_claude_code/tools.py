@@ -68,10 +68,35 @@ def edit_file_tool(path: str, old_str: str, new_str: str) -> Dict[str, Any]:
     }
 
 
+def delete_file_tool(path: str) -> Dict[str, Any]:
+    """
+    Deletes a file provided by the user.
+    :param path: The path to the file to delete.
+    :return: A dictionary with the path to the file and the action taken.
+    """
+    full_path = resolve_abs_path(path)
+    if not full_path.exists():
+        return {
+            "path": str(full_path),
+            "action": "file not found"
+        }
+    if not full_path.is_file():
+        return {
+            "path": str(full_path),
+            "action": "path is not a file"
+        }
+    full_path.unlink()
+    return {
+        "path": str(full_path),
+        "action": "deleted"
+    }
+
+
 TOOL_REGISTRY = {
     "read_file": read_file_tool,
     "list_files": list_files_tool,
-    "edit_file": edit_file_tool
+    "edit_file": edit_file_tool,
+    "delete_file": delete_file_tool
 }
 
 

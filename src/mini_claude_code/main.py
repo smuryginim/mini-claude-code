@@ -192,6 +192,8 @@ def run_coding_agent_loop():
                     resp = tool(args.get("path", "."))
                 elif name == "edit_file":
                     resp = tool(args.get("path", "."), args.get("old_str", ""), args.get("new_str", ""))
+                elif name == "delete_file":
+                    resp = tool(args.get("path", "."))
                 log_resp = resp
                 if name == "read_file" and isinstance(resp, dict) and "content" in resp:
                     log_resp = {

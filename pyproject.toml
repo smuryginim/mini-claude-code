@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mini-claude-code = "mini_claude_code:main"
+mini-claude-code = "mini_claude_code.main:run_coding_agent_loop"
 
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13.0"]

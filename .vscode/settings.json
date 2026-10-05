@@ -1,0 +1,10 @@
+{
+  "python.defaultInterpreterPath": "/home/smuryginim/development/mini-claude-code/.venv/bin/python",
+  "python.languageServer": "Default",
+  "files.associations": {
+    "*.py": "python"
+  },
+  "python.analysis.extraPaths": [
+    "/home/smuryginim/development/mini-claude-code/.venv/lib/python3.12/site-packages"
+  ]
+}

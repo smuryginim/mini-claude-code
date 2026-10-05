@@ -1,0 +1,26 @@
+[project]
+name = "mini-claude-code"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=2.25.0",
+    "python-dotenv>=1.2.3",
+]
+
+[project.scripts]
+mini-claude-code = "mini_claude_code:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+extraPaths = [".venv/lib/python3.12/site-packages"]
+
+[tool.pyrefly]
+search_paths = [".venv/lib/python3.12/site-packages"]
+venv_path = ".venv"

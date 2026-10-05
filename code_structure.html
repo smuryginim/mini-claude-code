@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mini-claude-code Architecture & Code Structure</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Mermaid CDN for rendering live interactive diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --code-bg: #030712;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 65%, rgba(139, 92, 246, 0.12) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        header {
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin: 2rem 0 3rem;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: var(--accent-primary);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.25rem;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .diagram-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            color: #e5e7eb;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-keyword { color: #c084fc; }
+        .code-func { color: #60a5fa; }
+        .code-str { color: #34d399; }
+        .code-comment { color: #6b7280; font-style: italic; }
+
+        .feature-list {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-bullet {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .line-badge {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-title">
+            <span class="badge">mini-claude-code</span>
+            <h1>Architecture & Code Structure</h1>
+        </div>
+        <div style="font-size: 0.875rem; color: var(--text-muted);">
+            Analysis of <code>main.py</code>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h2>Under the Hood of Mini Claude Code</h2>
+            <p>A breakdown of the architecture, execution flow, tool execution engine, and custom LLM prompting pipeline powering <code>main.py</code>.</p>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">🗺️ Architecture Diagrams</button>
+            <button class="tab-btn" onclick="switchTab('sequence')">🔄 Execution Flow</button>
+            <button class="tab-btn" onclick="switchTab('components')">🧩 Key Components</button>
+            <button class="tab-btn" onclick="switchTab('tools')">🛠️ Tool System</button>
+        </nav>
+
+        <!-- TAB 1: ARCHITECTURE DIAGRAMS -->
+        <div id="overview" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">1</div>
+                    <div class="card-title">High-Level Architecture</div>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    The diagram below shows how <code>main.py</code> interacts with the user, Gemini API, and the local file system.
+                </p>
+                <div class="diagram-container">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph UserInterface["Terminal Interface"]
+                            User(["👤 User Input"])
+                            Console["🖥️ Colorized Console Output"]
+                        end
+
+                        subgraph CoreAgent["Agent Core (main.py)"]
+                            Loop["run_coding_agent_loop()"]
+                            PromptBuilder["create_full_system_prompt()"]
+                            Parser["extract_tool_invocations()"]
+                            Registry["TOOL_REGISTRY"]
+                        end
+
+                        subgraph LLM["Google GenAI SDK"]
+                            GeminiClient["client.models.generate_content()"]
+                            Model["gemini-3.6-flash"]
+                        end
+
+                        subgraph FileTools["Local File Tools"]
+                            ReadFile["read_file_tool()"]
+                            ListFiles["list_files_tool()"]
+                            EditFile["edit_file_tool()"]
+                        end
+
+                        User -->|Type message| Loop
+                        Loop -->|Send History| GeminiClient
+                        GeminiClient -->|Request completion| Model
+                        Model -->|Return text| Loop
+                        Loop -->|Scan text| Parser
+                        Parser -->|Extracted tool calls| Registry
+                        Registry --> ReadFile
+                        Registry --> ListFiles
+                        Registry --> EditFile
+                        ReadFile & ListFiles & EditFile -->|tool_result JSON| Loop
+                        Loop -->|Print final response| Console
+
+                        style CoreAgent fill:#1e1b4b,stroke:#6366f1,stroke-width:2px
+                        style LLM fill:#064e3b,stroke:#10b981,stroke-width:2px
+                        style FileTools fill:#4c1d95,stroke:#8b5cf6,stroke-width:2px
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: EXECUTION FLOW -->
+        <div id="sequence" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">2</div>
+                    <div class="card-title">Sequence of Agent & Tool Loop</div>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Step-by-step sequence diagram illustrating how tool invocation loops re-prompt the LLM until completion.
+                </p>
+                <div class="diagram-container">
+                    <pre class="mermaid">
+                    sequenceDiagram
+                        autonumber
+                        actor User
+                        participant Loop as Agent Loop
+                        participant Parser as Tool Parser
+                        participant LLM as Gemini API
+                        participant Tool as Tool Registry
+
+                        User->>Loop: Enter prompt (e.g., "Fix test_calc.py")
+                        Loop->>LLM: execute_llm_call(conversation)
+                        LLM-->>Loop: Response text (e.g. "tool: read_file({...})")
+                        Loop->>Parser: extract_tool_invocations(text)
+                        Parser-->>Loop: Returns [("read_file", args)]
+                        
+                        alt Tool Call Detected
+                            Loop->>Tool: Execute read_file_tool(args)
+                            Tool-->>Loop: Return {file_path, content}
+                            Loop->>Loop: Append "tool_result(...)" to conversation
+                            Loop->>LLM: execute_llm_call(updated_conversation)
+                            LLM-->>Loop: Response text (Final answer)
+                        end
+
+                        Loop->>User: Display final response
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: KEY COMPONENTS -->
+        <div id="components" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🔑</div>
+                        <div class="card-title">Setup & Prompt Dynamic Injector</div>
+                    </div>
+                    <span class="line-badge">Lines 10 – 27, 103 – 116</span>
+                    <p style="color: var(--text-muted); margin: 0.75rem 0;">
+                        Initializes the GenAI client with <code>GEMINI_API_KEY</code> and builds a dynamic system prompt by inspecting docstrings and signatures of registered tools.
+                    </p>
+                    <div class="code-block">
+<span class="code-keyword">def</span> <span class="code-func">create_full_system_prompt</span>():
+    tool_str_repr = <span class="code-str">""</span>
+    <span class="code-keyword">for</span> tool_name <span class="code-keyword">in</span> TOOL_REGISTRY:
+        tool_str_repr += get_tool_str_representation(tool_name)
+    <span class="code-keyword">return</span> SYSTEM_PROMPT.format(tool_list_str=tool_str_repr)
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🔍</div>
+                        <div class="card-title">Custom Tool Parser</div>
+                    </div>
+                    <span class="line-badge">Lines 118 – 139</span>
+                    <p style="color: var(--text-muted); margin: 0.75rem 0;">
+                        Regex-free custom parser that extracts single-line JSON tool calls in the format <code>tool: NAME({"arg": "val"})</code>.
+                    </p>
+                    <div class="code-block">
+<span class="code-keyword">def</span> <span class="code-func">extract_tool_invocations</span>(text: <span class="code-func">str</span>):
+    <span class="code-comment"># Parses lines starting with 'tool:'</span>
+    <span class="code-comment"># Decodes JSON string into args dictionary</span>
+    ...
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">LLM Execution Wrapper</div>
+                    </div>
+                    <span class="line-badge">Lines 140 – 155</span>
+                    <p style="color: var(--text-muted); margin: 0.75rem 0;">
+                        Wraps <code>client.models.generate_content</code>, disabling automatic function calling to rely on explicit textual tool formatting.
+                    </p>
+                    <div class="code-block">
+<span class="code-keyword">def</span> <span class="code-func">execute_llm_call</span>(conversation):
+    response = client.models.generate_content(
+        model=<span class="code-str">"gemini-3.6-flash"</span>,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=<span class="code-keyword">True</span>)
+        )
+    )
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🔁</div>
+                        <div class="card-title">Autonomous Agent Loop</div>
+                    </div>
+                    <span class="line-badge">Lines 156 – 198</span>
+                    <p style="color: var(--text-muted); margin: 0.75rem 0;">
+                        Manages user input, feeds conversation context to Gemini, triggers tool executions automatically, and feeds results back into the loop.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: TOOLS SYSTEM -->
+        <div id="tools" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🛠️</div>
+                    <div class="card-title">Registered File Manipulation Tools</div>
+                </div>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        <div>
+                            <strong><code>read_file_tool(filename)</code></strong> <span class="line-badge">Lines 35 – 48</span>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Resolves file paths relative to current working directory and returns full file content.</p>
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet" style="background: var(--accent-emerald);"></div>
+                        <div>
+                            <strong><code>list_files_tool(path)</code></strong> <span class="line-badge">Lines 50 – 66</span>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Scans a directory using <code>Path.iterdir()</code> and classifies entries as files or directories.</p>
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet" style="background: var(--accent-amber);"></div>
+                        <div>
+                            <strong><code>edit_file_tool(path, old_str, new_str)</code></strong> <span class="line-badge">Lines 68 – 95</span>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Performs exact string replacements or creates new files if <code>old_str</code> is empty.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid diagrams
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose'
+        });
+
+        // Tab Switching Handler
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
